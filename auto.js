@@ -82,15 +82,15 @@ const Miss = 11;
 
       // Open bag
       await tap(1230, 398, deviceId);
-      await sleep(1000);
+      await sleep(2000);
       
       // Open pole tab 
       await tap(920, 50, deviceId);
-      await sleep(1000);
+      await sleep(2000);
 
       // Press repair on first pole
       await tap(780, 340, deviceId);
-      await sleep(1000);
+      await sleep(2000);
 
       // Press repair on popup
       await tap(610, 530, deviceId);
@@ -98,11 +98,11 @@ const Miss = 11;
 
       // Press yes
       await tap(610, 530, deviceId);
-      await sleep(1000);
+      await sleep(2000);
 
       // Press close
       await tap(1230, 40, deviceId);
-      await sleep(1000);
+      await sleep(2000);
       
       reeling = Date.now() - 6000;
     }
