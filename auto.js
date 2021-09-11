@@ -9,6 +9,7 @@ const { argv } = require("process");
 process.setMaxListeners(0);
 
 let sleep = (mili) => new Promise((cb) => setTimeout(() => cb(), mili));
+let deviceId = null;
 
 function onDetached(reason) {
   console.log(`[*] onDetached(reason=${reason})`);
@@ -20,11 +21,11 @@ function log(text) {
   });
 }
 
-function tap(x, y, durationMilisec = 0) {
+function tap(x, y, deviceId = null, durationMilisec = 0) {
   if (!durationMilisec)
-    return shell.exec(`adb shell input tap ${x} ${y}`, { async: true });
+    return shell.exec(`adb ${deviceId ? `-s ${deviceId}` : ''} shell input tap ${x} ${y}`, { async: true });
 
-  return shell.exec(`adb shell input touchscreen swipe ${x} ${y} ${x} ${y} ${durationMilisec}`, { async: true });
+  return shell.exec(`adb ${deviceId ? `-s ${deviceId}` : ''} shell input touchscreen swipe ${x} ${y} ${x} ${y} ${durationMilisec}`, { async: true });
 }
 
 log("Running");
@@ -33,6 +34,7 @@ let fishingState = -1;
 let reeling = 0;
 let fishLevel = 0;
 let cnt = 0;
+let minValue = 0;
 
 const None = 0;
 const Casting = 1;
@@ -52,17 +54,17 @@ const Miss = 11;
     if (fishingState == None) {
       // robot.keyTap("z");
       // Throw
-      await tap(1000, 418);
+      await tap(1000, 418, deviceId);
       fishLevel = 0;
     } else if (
       fishingState == Hit ||
       fishingState == Fighting
-      // || (fishLevel != 0 && fishLevel < 20)
+      || (minValue != 0 && fishLevel != 0 && fishLevel < 20)
     ) {
       // robot.keyTap("space");
       // Pull
-      await tap(1070, 618, 2000);
-      await sleep(1900);
+      await tap(1070, 618, deviceId, 2000);
+      await sleep(1700);
     } else if (
       fishingState == Catch ||
       fishingState == Boast ||
@@ -70,7 +72,7 @@ const Miss = 11;
     ) {
       // robot.keyTap("x");
       // Store fish
-      await tap(990, 598);
+      await tap(990, 598, deviceId);
     } else if (fishingState == CastingFail) {
       log("Fixing pole");
 
@@ -79,27 +81,27 @@ const Miss = 11;
       // cnt = 0;
 
       // Open bag
-      await tap(1230, 398);
+      await tap(1230, 398, deviceId);
       await sleep(1000);
       
       // Open pole tab 
-      await tap(920, 50);
+      await tap(920, 50, deviceId);
       await sleep(1000);
 
       // Press repair on first pole
-      await tap(780, 340);
+      await tap(780, 340, deviceId);
       await sleep(1000);
 
       // Press repair on popup
-      await tap(610, 530);
+      await tap(610, 530, deviceId);
       await sleep(2000);
 
       // Press yes
-      await tap(610, 530);
+      await tap(610, 530, deviceId);
       await sleep(1000);
 
       // Press close
-      await tap(1230, 40);
+      await tap(1230, 40, deviceId);
       await sleep(1000);
       
       reeling = Date.now() - 6000;
@@ -110,17 +112,22 @@ const Miss = 11;
 })();
 
 (async () => {
-  let deviceId = null;
-
   if (process.argv.length > 2)
     deviceId = process.argv[2];
+
+  if (process.argv.length > 3)
+    minValue = parseInt(process.argv[3]);
+
+  console.log({ deviceId });
 
   let device = null;
   
   if (deviceId)
-    device = await frida.getUsbDevice(deviceId, { timeout: null });
+    device = await frida.getDevice(deviceId, { timeout: null });
   else  
     device = await frida.getUsbDevice({ timeout: null });
+
+  deviceId = device.id;
 
   let processes = await device.enumerateProcesses();
   console.log("[*] Processes:", processes);
