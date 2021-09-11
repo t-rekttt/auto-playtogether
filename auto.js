@@ -50,21 +50,29 @@ const CastingFail = 10;
 const Miss = 11;
 
 (async () => {
+  function checkPulling() {
+    return (fishingState == Hit ||
+    fishingState == Fighting
+    || (minValue != 0 && fishLevel != 0 && fishLevel < minValue))
+  }
+
   while (true) {
     if (fishingState == None) {
       // robot.keyTap("z");
       // Throw
       await tap(1000, 418, deviceId);
       fishLevel = 0;
-    } else if (
-      fishingState == Hit ||
-      fishingState == Fighting
-      || (minValue != 0 && fishLevel != 0 && fishLevel < 20)
-    ) {
+    } else if (checkPulling()) {
       // robot.keyTap("space");
       // Pull
-      await tap(1070, 618, deviceId, 2000);
-      await sleep(1700);
+      await tap(1070, 618, deviceId, 10000);
+
+      for (let i = 0; i <= 5; i++) {
+        if (!checkPulling())
+          break;
+
+        await sleep(2000);
+      }
     } else if (
       fishingState == Catch ||
       fishingState == Boast ||
