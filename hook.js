@@ -163,6 +163,14 @@ function awaitForCondition(callback) {
 
 var il2cpp = null;
 
+function getCoors(vector3Instance) {
+  return {
+    x: vector3Instance.readDouble(),
+    y: vector3Instance.add("0x8").readDouble(),
+    z: vector3Instance.add("0x10").readDouble()
+  }
+}
+
 awaitForCondition(function (base) {
   il2cpp = ptr(base);
 
@@ -184,6 +192,26 @@ awaitForCondition(function (base) {
     "pointer",
     "long"
   ]);
+  let Vector3Init = new NativeFunction(il2cpp.add("0x8D2CA4"), "pointer", ["double", "double", "double"]);
+
+  let vectorSet = new Set();
+
+  Interceptor.attach(il2cpp.add("0x8D2CA4"), {
+    // onEnter: function (args) {
+    //   console.log("Vector3Init", args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+    //   console.log(JSON.stringify(this.context));
+    // },
+    onLeave: function (retval) {
+      vectorSet.add(retval.toString());
+      // console.log(retval.readByteArray(100));
+      // console.log(JSON.stringify(getCoors(retval)));
+    }
+  });
+
+
+  // let testVector3 = Vector3Init(0, 0, 0);
+
+  // console.log(getCoors(testVector3));
 
   let warp = null;
   let lastFishingState = -1;
@@ -204,9 +232,34 @@ awaitForCondition(function (base) {
   //   },
   // });
 
+  // Interceptor.attach(il2cpp.add("0x2A4A744"), {
+  //   onEnter: function (args) {
+  //     // console.log("Warp", args[0], args[1], args[2]);
+  //     // console.log(JSON.stringify(this.context));
+
+  //     let context = JSON.parse(JSON.stringify(this.context));
+
+  //     for (let k of Object.keys(context))
+  //       if (vectorSet.has(context[k])) {
+  //         console.log("Warp", k, JSON.stringify(getCoors(this.context[k])));
+  //       }
+  //   },
+  // });
+
   Interceptor.attach(il2cpp.add("0xC33B34"), {
     onEnter: function (args) {
       console.log("WarpToFriendPos", args[0], args[1], args[2]);
+
+      let context = JSON.parse(JSON.stringify(this.context));
+
+      for (let k of Object.keys(context))
+        if (vectorSet.has(context[k])) {
+          console.log(
+            "WarpToFriendPos",
+            k,
+            JSON.stringify(getCoors(this.context[k]))
+          );
+        }
     },
   });
 
@@ -219,7 +272,7 @@ awaitForCondition(function (base) {
         state
       });
 
-      console.log("UpdateFishingState", lastFishingState, state);
+      // console.log("UpdateFishingState", lastFishingState, state);
       
       lastFishingState = state;
     },
@@ -241,35 +294,38 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  function parseFloat(str, radix) {
-    var parts = str.split(".");
-    if (parts.length > 1) {
-      return (
-        parseInt(parts[0], radix) +
-        parseInt(parts[1], radix) / Math.pow(radix, parts[1].length)
-      );
-    }
-    return parseInt(parts[0], radix);
-  }
+  // Interceptor.attach(il2cpp.add("0xC35E78"), {
+  //   onEnter: function (args) {
+  //     console.log("isMyActor", isMyActor(args[0]));
 
-  Interceptor.attach(il2cpp.add("0xC35E78"), {
-    onEnter: function (args) {
-      console.log("isMyActor", isMyActor(args[0]));
-      console.log(
-        "SendToSyncPlayerWarp",
-        args[0],
-        args[1],
-        args[2].toInt32()
-      );
+  //     for (let k of Object.keys(this.context))
+  //       if (vectorSet.has(this.context[k].toString())) {
+  //         console.log(
+  //           "SendToSyncPlayerWarp",
+  //           k,
+  //           JSON.stringify(getCoors(this.context[k])),
+  //         );
+  //       }
+      
+  //     args[1] = ptr(0x0);
+  //     args[2] = ptr(0x0);
+  //     args[3] = ptr(0x0);
 
-      if (!warp)
-        warp = [args[1], args[2]];
-      else {
-        args[1] = warp[0];
-        args[2] = warp[1];
-      }
-    },
-  });
+  //     console.log(args[1].readByteArray(100));
+
+  //     console.log(
+  //       "SendToSyncPlayerWarp",
+  //       JSON.stringify(this.context)
+  //     );
+
+  //     let arr = [];
+
+  //     for (let i = 0; i < 10; i++)
+  //       arr.push(args[i].toString());
+
+  //     console.log(arr.join(' '));
+  //   },
+  // });
 
   Interceptor.attach(il2cpp.add("0xC33C5C"), {
     onEnter: function (args) {
@@ -303,18 +359,46 @@ awaitForCondition(function (base) {
 
       fish = args[0].toString();
 
+      let difficulty = args[0].add("0x44").readPointer();
       let touches = args[0].add("0x4C").readInt();
-      let height = args[0].add("0x34").readInt();
-      let level = shadowMap[args[0].toString()];
+
+      //let height = args[0].add("0x34").readFloat();
+
+      let level = difficulty.add("0x2C").readInt();
+      let difficultyId = difficulty.add("0x8").readInt();
+      let fightTime = difficulty.add("0x24").readFloat();
+      let hitTime = difficulty.add("0x28").readFloat();
+      //let bundleName = difficulty.add("0x34").readPointer();
 
       if (touches != lastTouched) {
-        console.log(touches, height, level);
+        //console.log(bundleName.readByteArray(100));
+        
+        /*
+        console.log(
+          JSON.stringify({
+            touches,
+            height,
+            level,
+            searchRemainTime,
+            traverseDirRight,
+            fightTime,
+            hitTime,
+            difficultyId,
+            //bundleName,
+          })
+        );
+        */
+
+        //console.log(args[0].readByteArray(200));
         lastTouched = touches;
         
         send({
           type: "fishTouch",
           touchesLeft: touches,
           level,
+          fightTime,
+          hitTime,
+          difficultyId,
         });
       }
 
@@ -322,12 +406,15 @@ awaitForCondition(function (base) {
     },
   };
 
+  //Interceptor.attach(il2cpp.add("0x2B40CD4"), fishTouchHookObj);
+
   Interceptor.attach(il2cpp.add("0x2B412F0"), fishTouchHookObj);
   
   Interceptor.attach(il2cpp.add("0x2B41748"), fishTouchHookObj);
 
   Interceptor.attach(il2cpp.add("0x2B41924"), fishTouchHookObj);
 
+  /*
   Interceptor.attach(il2cpp.add("0x2B442D0"), {
     onEnter: function (args) {
       this.shadowLevel = args[1].toInt32();
@@ -343,6 +430,7 @@ awaitForCondition(function (base) {
       //   console.log("Level: ", this.shadowLevel);
     }
   });
+  */
 
   // Interceptor.attach(il2cpp.add("0x2B41C5C"), {
   //   onEnter: function (args) {
@@ -492,6 +580,14 @@ awaitForCondition(function (base) {
       );
 
       // console.log("Fish size", getCatchFishSize(args[0]));
+
+      // let autoFishing = args[0].add("0x30").readInt();
+
+      // console.log('Auto fishing', autoFishing);
+
+      // args[0].add("0x30").writeInt(0);
+
+      // console.log("Auto fishing1", args[0].add("0x30").readInt());
 
       const fishId = args[1].add("0x14").readUInt();
       
