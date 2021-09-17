@@ -152,7 +152,7 @@ const fishes = [
 function awaitForCondition(callback) {
   var i = setInterval(function () {
     var addr = Module.findBaseAddress("libil2cpp.so");
-    console.log("Address found:", addr);
+    // console.log("Address found:", addr);
 
     if (addr) {
       clearInterval(i);
@@ -165,9 +165,9 @@ var il2cpp = null;
 
 function getCoors(vector3Instance) {
   return {
-    x: vector3Instance.readDouble(),
-    y: vector3Instance.add("0x8").readDouble(),
-    z: vector3Instance.add("0x10").readDouble()
+    x: vector3Instance.add("0x8").readDouble(),
+    y: vector3Instance.add("0x10").readDouble(),
+    z: vector3Instance.add("0x18").readDouble()
   }
 }
 
@@ -175,39 +175,38 @@ awaitForCondition(function (base) {
   il2cpp = ptr(base);
 
   let fish = null;
-  let shadowMap = {};
-  let isMyActor = new NativeFunction(il2cpp.add("0xC32804"), 'bool', ['pointer']);
-  let setInvisible = new NativeFunction(il2cpp.add("0xC33B50"), "void", [
-    "pointer",
-    "bool",
-  ]);
-  let getSuid = new NativeFunction(il2cpp.add("0xC327E4"), 'long', [
-    'pointer'
-  ]);
-  let sendToSyncPlayerWarp = new NativeFunction(
-    il2cpp.add("0xC35E78"), "void", ["pointer", "pointer", "float"]
-  );
-  let warpToSpawn = new NativeFunction(il2cpp.add("0xA91298"), "void", ["pointer"]);
-  let onClickLift = new NativeFunction(il2cpp.add("0xC4E914"), "void", [
-    "pointer",
-    "long"
-  ]);
-  let Vector3Init = new NativeFunction(il2cpp.add("0x8D2CA4"), "pointer", ["double", "double", "double"]);
+  // let shadowMap = {};
+  // let isMyActor = new NativeFunction(il2cpp.add("0xC32804"), 'bool', ['pointer']);
+  // let setInvisible = new NativeFunction(il2cpp.add("0xC33B50"), "void", [
+  //   "pointer",
+  //   "bool",
+  // ]);
+  // let getSuid = new NativeFunction(il2cpp.add("0xC327E4"), 'long', [
+  //   'pointer'
+  // ]);
+  // let sendToSyncPlayerWarp = new NativeFunction(
+  //   il2cpp.add("0xC35E78"), "void", ["pointer", "pointer", "float"]
+  // );
+  // let warpToSpawn = new NativeFunction(il2cpp.add("0xA91298"), "void", ["pointer"]);
+  // let onClickLift = new NativeFunction(il2cpp.add("0xC4E914"), "void", [
+  //   "pointer",
+  //   "long"
+  // ]);
+  // let Vector3Init = new NativeFunction(il2cpp.add("0x8D2CA4"), "pointer", ["double", "double", "double"]);
 
-  let vectorSet = new Set();
+  // let vectorSet = new Set();
 
-  Interceptor.attach(il2cpp.add("0x8D2CA4"), {
-    // onEnter: function (args) {
-    //   console.log("Vector3Init", args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-    //   console.log(JSON.stringify(this.context));
-    // },
-    onLeave: function (retval) {
-      vectorSet.add(retval.toString());
-      // console.log(retval.readByteArray(100));
-      // console.log(JSON.stringify(getCoors(retval)));
-    }
-  });
-
+  // Interceptor.attach(il2cpp.add("0x8D2CA4"), {
+  //   // onEnter: function (args) {
+  //   //   console.log("Vector3Init", args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+  //   //   console.log(JSON.stringify(this.context));
+  //   // },
+  //   onLeave: function (retval) {
+  //     vectorSet.add(retval.toString());
+  //     // console.log(retval.readByteArray(100));
+  //     // console.log(JSON.stringify(getCoors(retval)));
+  //   }
+  // });
 
   // let testVector3 = Vector3Init(0, 0, 0);
 
@@ -216,21 +215,21 @@ awaitForCondition(function (base) {
   let warp = null;
   let lastFishingState = -1;
   
-  // Interceptor.attach(il2cpp.add("0xC35A58"), {
-  //   onEnter: function (args) {
-  //     console.log("isMyActor", isMyActor(args[0]));
-  //     console.log("SendToSyncPlayerJump", args[0], args[1]);
-  //     console.log("Suid", getSuid(args[0]));
-  //     setInvisible(args[0], 1);
+  Interceptor.attach(il2cpp.add("0xd9e0f0"), {
+    onEnter: function (args) {
+      // console.log("isMyActor", isMyActor(args[0]));
+      console.log("SendToSyncPlayerJump", args[0], args[1]);
+      // console.log("Suid", getSuid(args[0]));
+      // setInvisible(args[0], 1);
 
-  //     // warpToSpawn(args[0]);
+      // warpToSpawn(args[0]);
 
-  //     // if (warp) {
-  //     //   console.log(warp);
-  //     //   sendToSyncPlayerWarp(args[0], warp[0], warp[1].toInt32());
-  //     // }
-  //   },
-  // });
+      // if (warp) {
+      //   console.log(warp);
+      //   sendToSyncPlayerWarp(args[0], warp[0], warp[1].toInt32());
+      // }
+    },
+  });
 
   // Interceptor.attach(il2cpp.add("0x2A4A744"), {
   //   onEnter: function (args) {
@@ -246,38 +245,62 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  Interceptor.attach(il2cpp.add("0xC33B34"), {
-    onEnter: function (args) {
-      console.log("WarpToFriendPos", args[0], args[1], args[2]);
+  // Interceptor.attach(il2cpp.add("0xC33B34"), {
+  //   onEnter: function (args) {
+  //     console.log("WarpToFriendPos", args[0], args[1], args[2]);
 
-      let context = JSON.parse(JSON.stringify(this.context));
+  //     let context = JSON.parse(JSON.stringify(this.context));
 
-      for (let k of Object.keys(context))
-        if (vectorSet.has(context[k])) {
-          console.log(
-            "WarpToFriendPos",
-            k,
-            JSON.stringify(getCoors(this.context[k]))
-          );
-        }
-    },
-  });
+  //     for (let k of Object.keys(context))
+  //       if (vectorSet.has(context[k])) {
+  //         console.log(
+  //           "WarpToFriendPos",
+  //           k,
+  //           JSON.stringify(getCoors(this.context[k]))
+  //         );
+  //       }
+  //   },
+  // });
 
-  Interceptor.attach(il2cpp.add("0xC4E918"), {
+  Interceptor.attach(il2cpp.add("0xdb7548"), {
     onEnter: function (args) {
       let state = args[1].toInt32();
 
       send({
         type: "updateFishingState",
-        state
+        state,
       });
 
       // console.log("UpdateFishingState", lastFishingState, state);
-      
-      lastFishingState = state;
+
+      // lastFishingState = state;
     },
   });
-  
+
+  // Interceptor.attach(il2cpp.add("0xda7234"), {
+  //   onEnter: function (args) {
+  //     console.log('Casting fail chat', args[0]);
+  //   },
+  // });
+
+  // Interceptor.attach(il2cpp.add("0xcabfc8"), {
+  //   onEnter: function (args) {
+  //     console.log("SendChatMessage", args[0], args[2], args[3]);
+  //     console.log(args[1].add('0xC').readUtf16String());
+  //   },
+  // });
+
+  // Interceptor.attach(il2cpp.add("0xb62dec"), {
+  //   onEnter: function (args) {
+  //     console.log(JSON.stringify(this.context));
+
+  //     console.log("setChat", args[0]);
+  //     console.log(args[1]);
+  //     // console.log(args[9].readByteArray(100));
+  //     // console.log(args[9].add("0xC").readUtf16String());
+  //   },
+  // });
+
   // Interceptor.attach(il2cpp.add("0xC4D6A0"), {
   //   onEnter: function (args) {
   //     console.log("OnClickFishing", args[0]);
@@ -327,23 +350,23 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  Interceptor.attach(il2cpp.add("0xC33C5C"), {
-    onEnter: function (args) {
-      console.log("SendToSyncPlayerMovement", parseFloat(args[0].readFloat()));
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0xC33C5C"), {
+  //   onEnter: function (args) {
+  //     console.log("SendToSyncPlayerMovement", parseFloat(args[0].readFloat()));
+  //   },
+  // });
 
-  Interceptor.attach(il2cpp.add("0xC3BFB8"), {
-    onEnter: function (args) {
-      console.log("get_CatchFishID", args[0].readUInt());
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0xC3BFB8"), {
+  //   onEnter: function (args) {
+  //     console.log("get_CatchFishID", args[0].readUInt());
+  //   },
+  // });
   
-  Interceptor.attach(il2cpp.add("0x2B45418"), {
-    onEnter: function (args) {
-      console.log("get_GetPoleInfo", args[0]);
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0x2B45418"), {
+  //   onEnter: function (args) {
+  //     console.log("get_GetPoleInfo", args[0]);
+  //   },
+  // });
 
   // Interceptor.attach(il2cpp.add("0xC360D8"), {
   //   onEnter: function (args) {
@@ -406,13 +429,13 @@ awaitForCondition(function (base) {
     },
   };
 
-  //Interceptor.attach(il2cpp.add("0x2B40CD4"), fishTouchHookObj);
+  // Interceptor.attach(il2cpp.add("0xd7dfb0"), fishTouchHookObj);
 
-  Interceptor.attach(il2cpp.add("0x2B412F0"), fishTouchHookObj);
+  // Interceptor.attach(il2cpp.add("0xd7f3b4"), fishTouchHookObj);
   
-  Interceptor.attach(il2cpp.add("0x2B41748"), fishTouchHookObj);
+  // Interceptor.attach(il2cpp.add("0xd7f590"), fishTouchHookObj);
 
-  Interceptor.attach(il2cpp.add("0x2B41924"), fishTouchHookObj);
+  // Interceptor.attach(il2cpp.add("0xd7f8c8"), fishTouchHookObj);
 
   /*
   Interceptor.attach(il2cpp.add("0x2B442D0"), {
@@ -452,17 +475,17 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  Interceptor.attach(il2cpp.add("0x2B42570"), {
-    onEnter: function (args) {
-      console.log("FishShadowController Fight");
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0xd801dc"), {
+  //   onEnter: function (args) {
+  //     console.log("FishShadowController Fight");
+  //   },
+  // });
 
-  Interceptor.attach(il2cpp.add("0x2B3FDBC"), {
-    onEnter: function (args) {
-      console.log("FishShadowController get_ShadowID");
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0x2B3FDBC"), {
+  //   onEnter: function (args) {
+  //     console.log("FishShadowController get_ShadowID");
+  //   },
+  // });
 
   // Interceptor.attach(il2cpp.add("0x2B3FDD0"), {
   //   onEnter: function (args) {
@@ -476,11 +499,11 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  Interceptor.attach(il2cpp.add("0x126B640"), {
-    onEnter: function (args) {
-      console.log("FishingDifficulty set_FishShadowSize", args[0].readInt());
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0x126B640"), {
+  //   onEnter: function (args) {
+  //     console.log("FishingDifficulty set_FishShadowSize", args[0].readInt());
+  //   },
+  // });
 
   // Interceptor.attach(il2cpp.add("0x2B4542C"), {
   //   onEnter: function (args) {
@@ -490,6 +513,212 @@ awaitForCondition(function (base) {
   //     );
   //   },
   // });
+
+  Interceptor.attach(il2cpp.add("0xdb6138"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer DetachFishingPole");
+
+      send({
+        type: 'detachFishingPole'
+      })
+    },
+  });
+
+  // Interceptor.attach(il2cpp.add("0xae0134"), {
+  //   onEnter: function (args) {
+  //     console.log("ResourceProgress Update");
+  //     console.log(args[0].add("0xc").readPointer().add("0xc").readUtf16String());
+  //   },
+  // });
+
+  // Interceptor.attach(il2cpp.add("0xab41f0"), {
+  //   onEnter: function (args) {
+  //     console.log("ChatSystem OnChatBroadCast");
+  //     // console.log(JSON.stringify(this.context));
+  //     // console.log(this.context.r4.readByteArray(100));
+  //     console.log(this.context.r6.add("0xC").readUtf16String());
+  //     // console.log(this.context.r7.readByteArray(100));
+  //   },
+  // });
+
+  Interceptor.attach(il2cpp.add("0xdb4544"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer SetAccelerator");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xdfe808"), {
+    onEnter: function (args) {
+      console.log("SpawnManager get_IsLoading");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0x10f830c"), {
+    onEnter: function (args) {
+      console.log("LoginAccountControl StartLoginAccount");
+    },
+  });
+  
+  let onClickFishing = new NativeFunction(il2cpp.add("0xdb62d0"), "void", ["pointer"]);
+  let onJump = new NativeFunction(il2cpp.add("0xdb2abc"), "void", ["pointer"]);
+  let escapeToSpawn = new NativeFunction(il2cpp.add("0xdb45e8"), "void", [
+    "pointer",
+  ]);
+
+  Interceptor.attach(il2cpp.add("0xdb62d0"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer OnClickFishing");
+
+      // escapeToSpawn(args[0]);
+    },
+  });
+  
+  Interceptor.attach(il2cpp.add("0xdb2abc"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer OnJump");
+
+      // escapeToSpawn(args[0]);
+
+      send({
+        type: 'onJump'
+      });
+    },
+  });
+  
+  Interceptor.attach(il2cpp.add("0xdb3e64"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer SetPositionAndRotationWithScale");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xd9e510"), {
+    onEnter: function (args) {
+      console.log("ActorControl SendToSyncPlayerWarp");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xd97924"), {
+    onEnter: function (args) {
+      console.log("ActorCharacterControl MoveToPlayerWarp");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xd97a88"), {
+    onEnter: function (args) {
+      console.log("ActorCharacterControl MoveToOtherPlayerWarp");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0x2ceba9c"), {
+    onEnter: function (args) {
+      console.log("VehicleControlOther HandleToWarp");
+    },
+  });
+  
+  Interceptor.attach(il2cpp.add("0xda95e0"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlOther HandleToWarp");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xb0ab6c"), {
+    onEnter: function (args) {
+      console.log("ActorUnderDogsOther HandleToWarp");
+    },
+  });
+  
+  // Interceptor.attach(il2cpp.add("0xdad3e0"), {
+  //   onEnter: function (args) {
+  //     console.log("ActorDefaultControlOther UpdateToSyncPlayerMovement_Warp");
+  //   },
+  // });
+
+  Interceptor.attach(il2cpp.add("0xda20dc"), {
+    onEnter: function (args) {
+      console.log("ActorControl HandleToWarp");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xdb4090"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer WarpToFriendPos");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xdb2bf0"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer SetSpawnPositionAndRotation");
+      // console.log(JSON.stringify(this.context));
+
+      // x
+      this.context.r1 = ptr(0x43720000);
+      // this.context.r2 = ptr(0x01000000);
+      // y
+      this.context.r3 = ptr(0x41c00000);
+      // this.context.r4 = ptr(0x10000000);
+      // z
+      // this.context.r5 = ptr(0x06000000);
+      // this.context.r6 = ptr(0xf0000000);
+      
+      // this.context.r7 = ptr(0x41000000);
+
+      // console.log(JSON.stringify(this.context));
+
+      send({
+        type: "setSpawnPositionAndRotation",
+      });
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xdb3160"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer ChangeStance");
+    },
+  });
+  
+  Interceptor.attach(il2cpp.add("0xdb06ec"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer Initialize");
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0x1561334"), {
+    onEnter: function (args) {
+      console.log("ItemRepairA get_UseCount");
+    },
+  });
+
+  // Interceptor.attach(il2cpp.add("0x2ca3b40"), {
+  //   onEnter: function (args) {
+  //     console.log("NavMeshAgent Warp");
+  //   },
+  // });
+
+  // Interceptor.attach(il2cpp.add("0xdb4170"), {
+  //   onEnter: function (args) {
+  //     console.log("ActorDefaultControlPlayer PlayToMoveDust");
+  //   },
+  // });
+
+  Interceptor.attach(il2cpp.add("0x1066588"), {
+    onEnter: function (args) {
+      console.log("MyCharacterMoveTarget OnStart");
+
+      // escapeToSpawn(args[0]);
+    },
+  });
+  
+  // Interceptor.attach(il2cpp.add("0xdb9c48"), {
+  //   onEnter: function (args) {
+  //     console.log("ActorDefaultControlPlayer CatchResult", args[1], args[2].toInt32());
+  //   },
+  // });
+
+  Interceptor.attach(il2cpp.add("0xdb42ec"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer SetDeltaMove");
+    },
+  });
 
   // Interceptor.attach(il2cpp.add("0x2AE6198"), {
   //   onEnter: function (args) {
@@ -508,17 +737,31 @@ awaitForCondition(function (base) {
   //   }
   // });
 
-  // Interceptor.attach(il2cpp.add("0xC3C2EC"), {
-  //   onEnter: function (args) {
-  //     console.log(
-  //       "AttachFishingPole",
-  //       args[0].add("0x88").readLong(),
-  //       args[0].add("0x70").readInt()
-  //     );
+  Interceptor.attach(il2cpp.add("0xdb600c"), {
+    onEnter: function (args) {
+      console.log("ActorDefaultControlPlayer AttachFishingPole");
+      
+      // console.log(args[1]);
 
-  //     console.log(args[0].add("0x90").readByteArray(1));
-  //   }
-  // });
+      send({
+        type: "attachFishingPole"
+      });
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xd848b0"), {
+    onLeave: function (retval) {
+      retval.replace(ptr(0));
+      
+      console.log("FishingSystem get_IsFishingCountOver", retval);
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0xc03f70"), {
+    onEnter: function (args) {
+      console.log("FriendSystem SendToServerPlayerLike", args[1], args[2]);
+    },
+  });
 
   // Interceptor.attach(il2cpp.add("0x2B4423C"), {
   //   // onEnter: function (args) {
@@ -556,11 +799,11 @@ awaitForCondition(function (base) {
   //   }
   // });
 
-  Interceptor.attach(il2cpp.add("0x2C8B4B0"), {
-    onEnter: function (args) {
-      console.log("get_Nickname", args[0]);
-    },
-  });
+  // Interceptor.attach(il2cpp.add("0x2C8B4B0"), {
+  //   onEnter: function (args) {
+  //     console.log("get_Nickname", args[0]);
+  //   },
+  // });
 
   // Interceptor.attach(il2cpp.add("0x2B482A8"), {
   //   onEnter: function (args) {
@@ -569,12 +812,12 @@ awaitForCondition(function (base) {
   //   },
   // });
 
-  let getCatchFishSize = new NativeFunction(il2cpp.add("0x2B46AD0"), 'int', ['pointer']);
+  // let getCatchFishSize = new NativeFunction(il2cpp.add("0x2B46AD0"), 'int', ['pointer']);
 
-  Interceptor.attach(il2cpp.add("0x2B476DC"), {
+  Interceptor.attach(il2cpp.add("0xd85698"), {
     onEnter: function (args) {
       console.log(
-        "ReceiveFishingCatch",
+        "ReceiveFishingCatch"
         // args[0].add("0x801EBC").readUInt(),
         // args[0].add("0x801F5C").readUInt()
       );
@@ -590,23 +833,21 @@ awaitForCondition(function (base) {
       // console.log("Auto fishing1", args[0].add("0x30").readInt());
 
       const fishId = args[1].add("0x14").readUInt();
-      
+
       let success = args[1].add("0x10").readInt();
       let fishId1 = fishId - 33000000;
-      
+
       console.log(fishId1);
 
-      let fishName = '';
-      if (fishId == 26010010)
-        fishName = 'Old Doll';
-      else if (fishId == 26010009)
-        fishName = 'Broken Car Door';
+      let fishName = "";
+      if (fishId == 26010010) fishName = "Old Doll";
+      else if (fishId == 26010009) fishName = "Broken Car Door";
       else {
         if (fishId1 > 500) {
           fishId1 -= 500;
           fishName += "Crowned ";
         }
-  
+
         fishName += fishes[fishId1 - 1];
       }
 
@@ -615,16 +856,16 @@ awaitForCondition(function (base) {
       console.log("Success:", success);
 
       send({
-        type: 'receiveFishingCatch',
+        type: "receiveFishingCatch",
         fishId,
         fishName,
-        success
-      })
+        success,
+      });
     },
   });
 
   
-  let getInvisible = new NativeFunction(il2cpp.add("0xC33B48"), "bool", ['pointer']);
+  // let getInvisible = new NativeFunction(il2cpp.add("0xC33B48"), "bool", ['pointer']);
   
   // Interceptor.attach(il2cpp.add("0xC32804"), {
   //   onEnter: function (args) {
