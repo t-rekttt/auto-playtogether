@@ -645,30 +645,30 @@ awaitForCondition(function (base) {
     },
   });
 
-  Interceptor.attach(il2cpp.add("0xdb2bf0"), {
-    onEnter: function (args) {
-      console.log("ActorDefaultControlPlayer SetSpawnPositionAndRotation");
-      // console.log(JSON.stringify(this.context));
+  // Interceptor.attach(il2cpp.add("0xdb2bf0"), {
+  //   onEnter: function (args) {
+  //     console.log("ActorDefaultControlPlayer SetSpawnPositionAndRotation");
+  //     // console.log(JSON.stringify(this.context));
 
-      // x
-      this.context.r1 = ptr(0x43720000);
-      // this.context.r2 = ptr(0x01000000);
-      // y
-      this.context.r3 = ptr(0x41c00000);
-      // this.context.r4 = ptr(0x10000000);
-      // z
-      // this.context.r5 = ptr(0x06000000);
-      // this.context.r6 = ptr(0xf0000000);
+  //     // x
+  //     this.context.r1 = ptr(0x43720000);
+  //     // this.context.r2 = ptr(0x01000000);
+  //     // y
+  //     this.context.r3 = ptr(0x41c00000);
+  //     // this.context.r4 = ptr(0x10000000);
+  //     // z
+  //     // this.context.r5 = ptr(0x06000000);
+  //     // this.context.r6 = ptr(0xf0000000);
       
-      // this.context.r7 = ptr(0x41000000);
+  //     // this.context.r7 = ptr(0x41000000);
 
-      // console.log(JSON.stringify(this.context));
+  //     // console.log(JSON.stringify(this.context));
 
-      send({
-        type: "setSpawnPositionAndRotation",
-      });
-    },
-  });
+  //     send({
+  //       type: "setSpawnPositionAndRotation",
+  //     });
+  //   },
+  // });
 
   Interceptor.attach(il2cpp.add("0xdb3160"), {
     onEnter: function (args) {
@@ -757,9 +757,34 @@ awaitForCondition(function (base) {
     },
   });
 
-  Interceptor.attach(il2cpp.add("0xc03f70"), {
+  // Interceptor.attach(il2cpp.add("0xc03f70"), {
+  //   onEnter: function (args) {
+  //     console.log("FriendSystem SendToServerPlayerLike", args[1], args[2]);
+  //     console.log(this.context.r2.toInt32());
+  //     console.log(JSON.stringify(this.context));
+  //   },
+  // });
+
+  let userInstance = null;
+
+  let sendToServerPlayerLike = new NativeFunction(il2cpp.add("0x924184"), 'void', ['pointer', 'int64']);
+
+  Interceptor.attach(il2cpp.add("0x924184"), {
     onEnter: function (args) {
-      console.log("FriendSystem SendToServerPlayerLike", args[1], args[2]);
+      console.log("NetNativeProtocol SendToServerPlayerLike", args[1]);
+      console.log(this.context.r2.toInt32());
+      userInstance = this.context.r0;
+      this.context.r2 = ptr(0);
+      sendToServerPlayerLike(ptr(userInstance), int64(this.context.r2));
+      console.log(JSON.stringify(this.context));
+    },
+  });
+
+  Interceptor.attach(il2cpp.add("0x9fc338"), {
+    onEnter: function (args) {
+      console.log("InGameNotificationSystem AddLike", args[1], args[2]);
+      console.log(this.context.r2.toInt32());
+      console.log(JSON.stringify(this.context));
     },
   });
 

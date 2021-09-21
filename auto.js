@@ -300,6 +300,8 @@ class PlayTogetherAuto {
     this.lastEvent = Date.now();
     console.log('Message: ', message);
 
+    return;
+
     if (message.type != 'send')
       return;
 
@@ -341,10 +343,11 @@ class PlayTogetherAuto {
     if (deviceId) device = await frida.getDevice(deviceId, { timeout });
     else device = await frida.getUsbDevice({ timeout });
 
-    let pid = await device.spawn(["com.haegin.playtogether"]);
-    await device.resume(pid);
+    // let pid = await device.spawn(["com.haegin.playtogether"]);
+    // await device.resume(pid);
     
-    let session = await device.attach(pid, { realm: "emulated" });
+    // let session = await device.attach(pid, { realm: "emulated" });
+    let session = await device.attach('PLAY TOGETHER', { realm: "emulated" });
     
     session.detached.connect(this.onDetached);
     
@@ -371,7 +374,7 @@ class PlayTogetherAuto {
     this.initValue();
     await this.initFrida(this.deviceId);
     await this.initADB(this.deviceId);
-    this.monitor();
+    // this.monitor();
   }
 
   constructor(deviceId) {
